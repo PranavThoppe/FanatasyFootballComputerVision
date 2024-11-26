@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Test</title>
+    <style>
+        body { padding: 20px; font-family: Arial, sans-serif; }
+        button { margin: 10px; padding: 10px; cursor: pointer; }
+        #response { background: #f4f4f4; padding: 15px; border-radius: 5px; }
+        .error { color: red; }
+        #status { margin: 10px; padding: 10px; }
+        .online { color: green; }
+        .offline { color: orange; }
+        #startButton { background-color: #4CAF50; color: white; border: none; }
+    </style>
+</head>
+<body>
+    <h1>Test Flask Backend</h1>
+    <button id="startButton">Start Backend Process</button>
+    <div id="status"></div>
+    <button id="getTeams">Get Teams</button>
+    <button id="getGameTimings">Get Game Timings</button>
+    <button id="getTeamTimings">Get Team Timings</button>
+    <button id="refreshData">Refresh Data from Server</button>
+
+    <h2>Response:</h2>
+    <pre id="response"></pre>
+
+    <script>
+        const BASE_URL = 'http://127.0.0.1:5000';
+        const STATUS_KEY = 'dataLastUpdated';
+
+        // Function to show/hide loading indicator
+        function toggleLoading(isLoading) {
+            const statusElement = document.getElementById('status');
+            if (isLoading) {
+                statusElement.textContent = 'Loading...';
+                statusElement.className = 'offline';
+            } else {
+                statusElement.textContent = '';
+                statusElement.className = '';
+            }
+        }
+
+        // Start Backend Process
+        async function startBackend() {
+            const responseElement = document.getElementById('response');
+            toggleLoading(true);
+            try {
+                responseElement.textContent = 'Starting backend process...';
+                
+                const response = await fetch(`${BASE_URL}/start_backend`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    responseElement.textContent = 'Backend started successfully! You can now fetch data.';
+                    await refreshAllData();
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                responseElement.className = 'error';
+                responseElement.textContent = `Error starting backend: ${error.message}`;
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // Function to get teams
+        async function getTeams() {
+            const responseElement = document.getElementById('response');
+            toggleLoading(true);
+
+            // Clear previous response content before fetching new data
+            responseElement.textContent = '';
+
+            try {
+                const response = await fetch(`${BASE_URL}/get_teams`);
+                const data = await response.json();
+
+                // Display the new teams data
+                responseElement.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Error:', error);
+                responseElement.className = 'error';
+                responseElement.textContent = `Error fetching teams: ${error.message}`;
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // Function to get game timings
+        async function getGameTimings() {
+            const responseElement = document.getElementById('response');
+            toggleLoading(true);
+
+            // Clear previous response content before fetching new data
+            responseElement.textContent = '';
+
+            try {
+                const response = await fetch(`${BASE_URL}/get_game_timings`);
+                const data = await response.json();
+
+                // Display the new game timings data
+                responseElement.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Error:', error);
+                responseElement.className = 'error';
+                responseElement.textContent = `Error fetching game timings: ${error.message}`;
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // Function to get team timings
+        async function getTeamTimings() {
+            const responseElement = document.getElementById('response');
+            toggleLoading(true);
+
+            // Clear previous response content before fetching new data
+            responseElement.textContent = '';
+
+            try {
+                const response = await fetch(`${BASE_URL}/get_team_timings`);
+                const data = await response.json();
+
+                // Display the new team timings data
+                responseElement.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Error:', error);
+                responseElement.className = 'error';
+                responseElement.textContent = `Error fetching team timings: ${error.message}`;
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // Function to refresh all data
+        async function refreshAllData() {
+            await getTeams();
+            await getGameTimings();
+            await getTeamTimings();
+        }
+
+        // Event Listeners
+        document.getElementById('startButton').addEventListener('click', startBackend);
+        document.getElementById('getTeams').addEventListener('click', getTeams);
+        document.getElementById('getGameTimings').addEventListener('click', getGameTimings);
+        document.getElementById('getTeamTimings').addEventListener('click', getTeamTimings);
+        document.getElementById('refreshData').addEventListener('click', refreshAllData);
+    </script>
+</body>
+</html>
