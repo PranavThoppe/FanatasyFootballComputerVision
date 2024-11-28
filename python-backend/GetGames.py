@@ -86,6 +86,8 @@ def run_backend_script():
             teamTimings[t] = i
         i += 1
 
+
+
 @app.route('/get_teams', methods=['GET'])
 def get_teams():
     return jsonify(teams)
@@ -108,3 +110,4 @@ def start_backend():
 
 if __name__ == '__main__':
     app.run(debug=True)
+    
