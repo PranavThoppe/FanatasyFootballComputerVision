@@ -27,8 +27,8 @@ def run_backend_script():
 
     payload = {
         '_token': csrf_token,
-        'email': 'prv.thoppe@gmail.com',
-        'password': 'hyguys..'
+        'email': '######', # Use own Email and Password
+        'password': '######'
     }
     session.post(loginUrl, data=payload)
 
