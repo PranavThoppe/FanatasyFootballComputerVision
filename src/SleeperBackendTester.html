@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sleeper Roster Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+        }
+        .input-container {
+            margin-bottom: 20px;
+        }
+        .input-container input {
+            width: 80%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .input-container button {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .input-container button:hover {
+            background-color: #45a049;
+        }
+        .data-container {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .data-container ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .data-container li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Sleeper Roster Viewer</h1>
+        <div class="input-container">
+            <input type="text" id="username" placeholder="Enter Username" />
+            <button onclick="getUserData()">Get Data</button>
+        </div>
+
+        <div id="error-message" style="color: red; display: none;">Error fetching data. Please check the username or try again later.</div>
+
+        <div class="data-container" id="data-container" style="display: none;">
+            <h2>Roster Data</h2>
+            <ul id="roster-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        // Function to fetch data from the Flask app
+        function getUserData() {
+            const username = document.getElementById("username").value.trim();
+            const errorMessage = document.getElementById("error-message");
+            const dataContainer = document.getElementById("data-container");
+            const rosterList = document.getElementById("roster-list");
+
+            // Hide previous error and data
+            errorMessage.style.display = 'none';
+            dataContainer.style.display = 'none';
+            rosterList.innerHTML = '';
+
+            if (!username) {
+                alert("Please enter a username.");
+                return;
+            }
+
+            // Show loading message
+            const loadingMessage = document.createElement("li");
+            loadingMessage.innerText = "Loading data...";
+            rosterList.appendChild(loadingMessage);
+
+            // Make the API request
+            const url = 'http://localhost:5000/get_user_data?username=' + username;
+
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Remove loading message
+                    rosterList.removeChild(loadingMessage);
+
+                    // Check if the response is valid
+                    if (data.length === 0) {
+                        errorMessage.style.display = 'block';
+                        return;
+                    }
+
+                    // Display the data
+                    data.forEach(league => {
+                        const leagueName = league["League Name"];
+                        const starters = league["Starters"];
+
+                        const leagueItem = document.createElement("li");
+                        leagueItem.innerHTML = `<strong>${leagueName}:</strong>`;
+                        rosterList.appendChild(leagueItem);
+
+                        starters.forEach(starter => {
+                            const starterItem = document.createElement("li");
+                            starterItem.innerText = `${starter.Name} (${starter.Position}) - ${starter.Team}`;
+                            rosterList.appendChild(starterItem);
+                        });
+                    });
+
+                    // Show the data container
+                    dataContainer.style.display = 'block';
+                })
+                .catch(error => {
+                    // Handle error
+                    console.error("Error fetching data:", error);
+                    errorMessage.style.display = 'block';
+                    // Remove loading message
+                    rosterList.removeChild(loadingMessage);
+                });
+        }
+    </script>
+</body>
+</html>
