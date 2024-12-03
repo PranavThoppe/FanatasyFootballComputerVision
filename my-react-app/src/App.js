@@ -7,7 +7,9 @@ function App() {
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [gameTimingColors, setGameTimingColors] = useState({}); // Global variable to track game timing colors
+  const gameTimingColors = {}; // Global variable to track game timing colors
+  const colors = ["red", "aqua", "green", "orange", "purple"];
+
 
   const SLEEPER_URL = "https://sleeperrosterviewer.onrender.com/get_user_data?username=Branau";
   const BASE_URL = "https://tvwebscrapingwebservice.onrender.com";
@@ -60,19 +62,15 @@ function App() {
 
   // Function to select a color from the predefined set, cycling through the colors
   const getGameTimingColor = (timing) => {
-    const colors = ["red", "aqua", "green", "orange", "purple"];
-    
-    // Check if the color for this timing is already assigned
-    if (!gameTimingColors[timing]) {
-      const color = colors[Object.keys(gameTimingColors).length % colors.length];  // Cycle through colors based on the number of unique timings
-      setGameTimingColors((prevColors) => {
-        const updatedColors = { ...prevColors, [timing]: color };
-        console.log(updatedColors); // Log the updated color mapping
-        return updatedColors;
-      });
+    if (timing in gameTimingColors) {
+      return gameTimingColors[timing];  // Return the color if already assigned
     }
-
-    return gameTimingColors[timing] || "gray";  // Return the color for the game timing, default to "gray" if not found
+  
+    // Assign a color based on the number of existing timings
+    const nextColor = colors[Object.keys(gameTimingColors).length];
+    gameTimingColors[timing] = nextColor;  // Manually assign the color
+  
+    return nextColor;
   };
 
   return (
