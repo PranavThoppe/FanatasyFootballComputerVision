@@ -7,6 +7,7 @@ function App() {
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [gameTimingColors, setGameTimingColors] = useState({}); // Global variable to track game timing colors
 
   const SLEEPER_URL = "https://sleeperrosterviewer.onrender.com/get_user_data?username=Branau";
   const BASE_URL = "https://tvwebscrapingwebservice.onrender.com";
@@ -57,20 +58,46 @@ function App() {
     return gameTimings[gameIndex] || "N/A"; // Return "N/A" if no timing is found
   };
 
+  // Function to select a color from the predefined set, cycling through the colors
+  const getGameTimingColor = (timing) => {
+    const colors = ["red", "aqua", "green", "orange", "purple"];
+    
+    // Check if the color for this timing is already assigned
+    if (!gameTimingColors[timing]) {
+      const color = colors[Object.keys(gameTimingColors).length % colors.length];  // Cycle through colors based on the number of unique timings
+      setGameTimingColors((prevColors) => {
+        const updatedColors = { ...prevColors, [timing]: color };
+        console.log(updatedColors); // Log the updated color mapping
+        return updatedColors;
+      });
+    }
+
+    return gameTimingColors[timing] || "gray";  // Return the color for the game timing, default to "gray" if not found
+  };
+
   return (
     <div style={{ display: "flex", flexDirection: "row", gap: "20px" }}>
-            {/* TV Web Scraping Section */}
-            <div style={{ flex: 1, padding: "10px" }}>
+      {/* TV Web Scraping Section */}
+      <div style={{ flex: "0 0 40%", padding: "10px" }}>
         <h1>TV Web Scraping Service</h1>
 
         <h2>Game Timings</h2>
         <ul>
           {gameTimings.map((timing, index) => (
-            <li key={index}>{timing}</li>
+            <li
+              key={index}
+              style={{
+                backgroundColor: getGameTimingColor(timing), // Use the optimized color selection
+                padding: "5px",
+                marginBottom: "5px",
+              }}
+            >
+              {timing}
+            </li>
           ))}
         </ul>
 
-        <h2>Team Timings</h2>
+        <h2>Teams</h2>
         <ul>
           {Object.entries(teamTimings).map(([team, timing]) => (
             <li key={team}>
@@ -79,15 +106,16 @@ function App() {
           ))}
         </ul>
 
-        <h2>Teams</h2>
+        <h2>Matchups</h2>
         <ul>
           {teams.map((team, index) => (
             <li key={index}>{team}</li>
           ))}
         </ul>
       </div>
+
       {/* Sleeper Data Section */}
-      <div style={{ flex: 1, borderRight: "1px solid gray", padding: "10px" }}>
+      <div style={{ flex: "0 0 60%", padding: "10px" }}>
         <h1>Sleeper League Viewer</h1>
         {leagueData.map((league) => (
           <div key={league["League ID"]}>
@@ -100,7 +128,8 @@ function App() {
                     {player.Name || "N/A"} - {player.Position} - {player.Team}{" "}
                     {gameTiming !== "N/A" && (
                       <>
-                        <strong>Game Timing:</strong> {gameTiming}
+                        <strong>Game Timing: </strong> 
+                        <span style={{ color: getGameTimingColor(gameTiming) }}>{gameTiming}</span>
                       </>
                     )}
                   </li>
@@ -110,8 +139,6 @@ function App() {
           </div>
         ))}
       </div>
-
-
     </div>
   );
 }
